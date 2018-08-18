@@ -1,6 +1,7 @@
-package me.karun
+package me.karun.serialization
 
 import java.lang.reflect.Constructor
+import java.util.function.Supplier
 
 case class InstanceCreator[T](clazz: Class[T]) {
   def newInstance(values: Map[String, Any]): T = {
@@ -11,6 +12,10 @@ case class InstanceCreator[T](clazz: Class[T]) {
       .asInstanceOf[Array[_ <: Object]]
 
     clazz.getConstructors.head.asInstanceOf[Constructor[T]].newInstance(params: _*)
+  }
+
+  def generateWithTestData(suppliers: List[Supplier[_]]): T = {
+    generateWithTestData()
   }
 
   def generateWithTestData(): T = {
