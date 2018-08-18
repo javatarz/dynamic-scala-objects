@@ -11,7 +11,8 @@ class InstanceCreatorTest extends WordSpec with Matchers {
   "newInstance method" when {
     "provided a map" should {
       "create a new instance" in {
-        val instance = classOf[CaseClassWithPrivateParameters].newInstance(Map("key" -> "value", "number" -> 1))
+        val data = Map("key" -> "value", "number" -> 1)
+        val instance = classOf[CaseClassWithPrivateParameters].newInstance(data)
 
         instance shouldBe CaseClassWithPrivateParameters("value", 1)
       }
@@ -30,10 +31,10 @@ class InstanceCreatorTest extends WordSpec with Matchers {
     "called with suppliers" ignore {
       val stringSupplier: Supplier[String] = () => ""
       val intSupplier: Supplier[Int] = () => 0
-      val list = List(stringSupplier, intSupplier)
+      val suppliers = List(stringSupplier, intSupplier)
 
       "create an instance with suppliers" in {
-        val instance = classOf[CaseClassWithParameter].generateWithTestData(list)
+        val instance = classOf[CaseClassWithParameter].generateWithTestData(suppliers)
 
         instance.hello("Test User 2") shouldBe "Hello Test User 2"
       }
