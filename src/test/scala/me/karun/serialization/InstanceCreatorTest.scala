@@ -1,17 +1,15 @@
 package me.karun.serialization
 
-import java.util.function.Supplier
-
+import me.karun.serialization.InstanceCreator.richClassImplicit
 import me.karun.serialization.model.{CaseClassWithParameter, CaseClassWithPrivateParameters, ClassWithoutParameters}
 import org.scalatest.{Matchers, WordSpec}
-import InstanceCreator.richClassImplicit
 
 class InstanceCreatorTest extends WordSpec with Matchers {
 
   "newInstance method" when {
     "provided a map" should {
       "create a new instance" in {
-        val data = Map("key" -> "value", "number" -> 1)
+        val data: Map[String, Any] = Map("key" -> "value", "number" -> 1)
         val instance = classOf[CaseClassWithPrivateParameters].newInstance(data)
 
         instance shouldBe CaseClassWithPrivateParameters("value", 1)
@@ -24,19 +22,18 @@ class InstanceCreatorTest extends WordSpec with Matchers {
       "create an instance with default suppliers" in {
         val instance = classOf[ClassWithoutParameters].generateWithTestData()
 
-        instance.hello("Test User 1") shouldBe "Hello Test User 1"
+        instance.hello("Test User 1") shouldBe "Hello, Test User 1."
       }
     }
 
-    "called with suppliers" ignore {
-      val stringSupplier: Supplier[String] = () => ""
-      val intSupplier: Supplier[Int] = () => 0
-      val suppliers = List(stringSupplier, intSupplier)
+    "called with overriding and default suppliers " should {
+      val stringSupplier = () => "Bonjour"
+      val suppliers: Map[Class[_], () => _] = Map(classOf[String] -> stringSupplier)
 
       "create an instance with suppliers" in {
         val instance = classOf[CaseClassWithParameter].generateWithTestData(suppliers)
 
-        instance.hello("Test User 2") shouldBe "Hello Test User 2"
+        instance.hello("Test User 2") shouldBe "Bonjour, Test User 2. Your token number is 0."
       }
     }
   }
