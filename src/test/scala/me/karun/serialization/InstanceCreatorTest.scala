@@ -9,10 +9,10 @@ class InstanceCreatorTest extends WordSpec with Matchers {
   "newInstance method" when {
     "provided a map" should {
       "create a new instance" in {
-        val data: Map[String, Any] = Map("key" -> "value", "number" -> 1)
+        val data: Map[String, Any] = Map("key" -> "Apples", "number" -> 1)
         val instance = classOf[CaseClassWithPrivateParameters].newInstance(data)
 
-        instance shouldBe CaseClassWithPrivateParameters("value", 1)
+        instance shouldBe CaseClassWithPrivateParameters("Apples", 1)
       }
     }
   }
@@ -26,14 +26,21 @@ class InstanceCreatorTest extends WordSpec with Matchers {
       }
     }
 
-    "called with overriding and default suppliers " should {
+    "called with overriding and default suppliers" should {
       val stringSupplier = () => "Bonjour"
       val suppliers: Map[Class[_], () => _] = Map(classOf[String] -> stringSupplier)
 
       "create an instance with suppliers" in {
         val instance = classOf[CaseClassWithParameter].generateWithTestData(suppliers)
 
-        instance.hello("Test User 2") shouldBe "Bonjour, Test User 2. Your token number is 0."
+        instance.hello("Test User 2") shouldBe "Bonjour, Test User 2. Your token number is 0. CaseClassWithPrivateParameters(Bonjour,0)"
+      }
+
+      "create an instance with data" in {
+        val data: Map[String, Any] = Map("key" -> "Apples", "number" -> 1)
+        val instance = classOf[CaseClassWithParameter].generateWithTestData(suppliers, data)
+
+        instance.hello("Test User 2") shouldBe "Bonjour, Test User 2. Your token number is 0. CaseClassWithPrivateParameters(Apples,1)"
       }
     }
   }

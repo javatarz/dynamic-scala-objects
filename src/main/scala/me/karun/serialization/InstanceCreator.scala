@@ -18,15 +18,16 @@ case class InstanceCreator[T](clazz: Class[T]) {
 
   import InstanceCreator.richClassImplicit
 
-  def generateWithTestData(suppliers: Map[Class[_], () => _]): T = {
+  def generateWithTestData(suppliers: Map[Class[_], () => _], data: Map[String, Any] = Map.empty): T = {
     val allSuppliers = defaultSuppliers ++ suppliers
     val objectCreator = () => {
-      val constructor = clazz.getConstructors.head.asInstanceOf[Constructor[T]]
-      val params: Array[_ <: Object] = constructor.getParameterTypes
-        .map(paramType => paramType.generateWithTestData(allSuppliers))
+      val privateFieldPrefix = s"${clazz.getName.replace(".", "$")}$$$$"
+      val params = clazz.getDeclaredFields
+        .map(f => data.getOrElse(f.getName.replace(privateFieldPrefix, ""), f.getType.generateWithTestData(allSuppliers, data)))
         .array
         .asInstanceOf[Array[_ <: Object]]
-      constructor.newInstance(params: _*)
+
+      clazz.getConstructors.head.asInstanceOf[Constructor[T]].newInstance(params: _*)
     }
     val supplier = allSuppliers.getOrElse(clazz, objectCreator)
     supplier.apply().asInstanceOf[T]
