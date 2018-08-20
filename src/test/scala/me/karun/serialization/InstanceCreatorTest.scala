@@ -1,18 +1,28 @@
 package me.karun.serialization
 
 import me.karun.serialization.InstanceCreator.richClassImplicit
-import me.karun.serialization.model.{CaseClassWithParameter, CaseClassWithPrivateParameters, ClassWithoutParameters}
+import me.karun.serialization.model.{
+  CaseClassWithNestedObjects, CaseClassWithPrivateParameters, ClassWithoutParameters}
 import org.scalatest.{Matchers, WordSpec}
 
 class InstanceCreatorTest extends WordSpec with Matchers {
 
   "newInstance method" when {
-    "provided a map" should {
+    "on case classes" should {
       "create a new instance" in {
         val data: Map[String, Any] = Map("key" -> "Apples", "number" -> 1)
         val instance = classOf[CaseClassWithPrivateParameters].newInstance(data)
 
         instance shouldBe CaseClassWithPrivateParameters("Apples", 1)
+      }
+    }
+
+    "on nested case classes" should {
+      "create a new instance" in {
+        val data: Map[String, Any] = Map("greeting" -> "Bonjour", "tokenNumber" -> 1, "key" -> "Apples", "number" -> 2)
+        val instance = classOf[CaseClassWithNestedObjects].newInstance(data)
+
+        instance shouldBe CaseClassWithNestedObjects("Bonjour", 1, CaseClassWithPrivateParameters("Apples", 2))
       }
     }
   }
@@ -31,14 +41,14 @@ class InstanceCreatorTest extends WordSpec with Matchers {
       val suppliers: Map[Class[_], () => _] = Map(classOf[String] -> stringSupplier)
 
       "create an instance with suppliers" in {
-        val instance = classOf[CaseClassWithParameter].generateWithTestData(suppliers)
+        val instance = classOf[CaseClassWithNestedObjects].generateWithTestData(suppliers)
 
         instance.hello("Test User 2") shouldBe "Bonjour, Test User 2. Your token number is 0. CaseClassWithPrivateParameters(Bonjour,0)"
       }
 
       "create an instance with data" in {
         val data: Map[String, Any] = Map("key" -> "Apples", "number" -> 1)
-        val instance = classOf[CaseClassWithParameter].generateWithTestData(suppliers, data)
+        val instance = classOf[CaseClassWithNestedObjects].generateWithTestData(suppliers, data)
 
         instance.hello("Test User 2") shouldBe "Bonjour, Test User 2. Your token number is 0. CaseClassWithPrivateParameters(Apples,1)"
       }
