@@ -2,6 +2,8 @@ package me.karun.serialization
 
 import java.lang.reflect.Constructor
 
+import scala.language.implicitConversions
+
 case class InstanceCreator[T](clazz: Class[T]) {
 
   import InstanceCreator.richClassImplicit
